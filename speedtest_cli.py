@@ -486,6 +486,8 @@ def speedtest():
     parser.add_argument('--source', help='Source IP address to bind to')
     parser.add_argument('--version', action='store_true',
                         help='Show the version number and exit')
+    parser.add_argument('--download_only', action='store_true', help='Only perform download test')
+    parser.add_argument('--upload_only', action='store_true', help='Only perform upload test')
 
     options = parser.parse_args()
     if isinstance(options, tuple):
@@ -605,8 +607,8 @@ def speedtest():
         except NameError:
             print_('Hosted by %(sponsor)s (%(name)s) [%(d)0.2f km]: '
                    '%(latency)s ms' % best)
-    else:
-        print_('Ping: %(latency)s ms' % best)
+    #else:
+        # print_('Ping: %(latency)s ms' % best)
 
     sizes = [350, 500, 750, 1000, 1500, 2000, 2500, 3000, 3500, 4000]
     urls = []
@@ -616,11 +618,12 @@ def speedtest():
                         (os.path.dirname(best['url']), size, size))
     if not args.simple:
         print_('Testing download speed', end='')
-    dlspeed = downloadSpeed(urls, args.simple)
-    if not args.simple:
-        print_()
-    print_('Download: %0.2f M%s/s' %
-           ((dlspeed / 1000 / 1000) * args.units[1], args.units[0]))
+    if not args.upload_only:    
+        dlspeed = downloadSpeed(urls, args.simple)
+        if not args.simple:
+            print_()
+        print_('%0.2f' %
+           ((dlspeed / 1000 / 1000) * args.units[1]))
 
     sizesizes = [int(.25 * 1000 * 1000), int(.5 * 1000 * 1000)]
     sizes = []
@@ -629,11 +632,12 @@ def speedtest():
             sizes.append(size)
     if not args.simple:
         print_('Testing upload speed', end='')
-    ulspeed = uploadSpeed(best['url'], sizes, args.simple)
-    if not args.simple:
-        print_()
-    print_('Upload: %0.2f M%s/s' %
-           ((ulspeed / 1000 / 1000) * args.units[1], args.units[0]))
+    if not args.download_only:    
+        ulspeed = uploadSpeed(best['url'], sizes, args.simple)
+        if not args.simple:
+            print_()
+        print_('%0.2f' %
+               ((ulspeed / 1000 / 1000) * args.units[1]))
 
     if args.share and args.mini:
         print_('Cannot generate a speedtest.net share results image while '
